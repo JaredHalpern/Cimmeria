@@ -2,7 +2,7 @@
 //  CimmeriaNetTests.swift
 //
 //
-//  Created by Jared Halpern on 1/12/25.
+//  Copyright Jared Halpern 2025.
 //
 
 import XCTest

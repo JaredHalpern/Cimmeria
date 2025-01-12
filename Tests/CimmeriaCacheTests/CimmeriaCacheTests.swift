@@ -1,5 +1,5 @@
 //
-//  CimmeriaTests.swift
+//  CimmeriaCacheTests.swift
 //
 //
 //  Copyright Jared Halpern 2025.
@@ -8,7 +8,7 @@
 import XCTest
 @testable import Cimmeria
 
-final class CimmeriaTests: XCTestCase {
+final class CimmeriaCacheTests: XCTestCase {
     func testExample() throws {
         // XCTest Documentation
         // https://developer.apple.com/documentation/xctest
