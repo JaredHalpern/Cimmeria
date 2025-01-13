@@ -37,7 +37,7 @@ extension CimmNetService {
     
     /// Cancel a specified network task in the queue.
     /// - Parameter url: The URL of the network task to cancel.
-    func cancelTask(for url: URL) {
+    public func cancelTask(for url: URL) {
         self.taskQueue.async (flags: .barrier) {
             self.dataTasks[url]?.cancel()
             self.dataTasks.removeValue(forKey: url)
@@ -45,7 +45,7 @@ extension CimmNetService {
     }
     
     /// Cancel all outgoing network tasks in the queue.
-    func cancelAllTasks() {
+    public func cancelAllTasks() {
         self.taskQueue.async (flags: .barrier) {
             for task in self.dataTasks.values {
                 task.cancel()

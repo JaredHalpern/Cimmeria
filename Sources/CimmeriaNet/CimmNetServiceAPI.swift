@@ -6,7 +6,7 @@
 
 import Foundation
 
-protocol CimmNetServiceAPI {
+public protocol CimmNetServiceAPI {
     func cancelAllTasks()
     func cancelTask(for url: URL)
 }
