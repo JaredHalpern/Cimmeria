@@ -7,11 +7,11 @@ let package = Package(
     name: "Cimmeria",
     platforms: [.macOS(.v13), .iOS(.v16)],
     products: [
-        // Products define the executables and libraries a package produces, 
+        // Products define the executables and libraries a package produces,
         // making them visible to other packages.
         .library(name: "CimmeriaCache", targets: ["CimmeriaCache"]),
         .library(name: "CimmeriaNet", targets: ["CimmeriaNet"]),
-//        .library(name: "CimmeriaSec", targets: ["CimmeriaSec"]),
+        .library(name: "CimmeriaSec", targets: ["CimmeriaSec"]),
     ],
     targets: [
         // Targets are the basic building blocks of a package, defining a module or a test suite.
@@ -33,11 +33,11 @@ let package = Package(
         .testTarget(
             name: "CimmeriaNetTests",
             dependencies: ["CimmeriaNet"]),
-//        .target(
-//            name: "CimmeriaSec",
-//            dependencies: []),
-//        .testTarget(
-//            name: "CimmeriaSecTests",
-//            dependencies: ["CimmeriaSec"]),
+        .target(
+            name: "CimmeriaSec",
+            dependencies: []),
+        .testTarget(
+            name: "CimmeriaSecTests",
+            dependencies: ["CimmeriaSec"]),
     ]
 )
