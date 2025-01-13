@@ -1,4 +1,4 @@
-//  CacheService.swift
+//  CimmCacheService.swift
 //
 //  Copyright Jared Halpern 2025.
 
@@ -8,7 +8,7 @@
 
 import Foundation
 
-protocol CacheServiceAPI {
+public protocol CimmCacheServiceAPI {
     associatedtype Key: Hashable & Codable
     associatedtype Value: Codable
     
@@ -20,7 +20,7 @@ protocol CacheServiceAPI {
 }
 
 /// A basic key-value LRU cache.
-class CacheService<Key: Hashable & Codable, Value: Codable>: Codable, CacheServiceAPI {
+public class CimmCacheService<Key: Hashable & Codable, Value: Codable>: Codable, CimmCacheServiceAPI {
 
     private var capacity: Int
     private var cache: [Key: Node<Key, Value>] = [:]
@@ -34,20 +34,20 @@ class CacheService<Key: Hashable & Codable, Value: Codable>: Codable, CacheServi
         case cache, capacity, head, tail
     }
     
-    required init(from decoder: any Decoder) throws {
-        let container: KeyedDecodingContainer<CacheService<Key, Value>.CodingKeys> = try decoder.container(keyedBy: CacheService<Key, Value>.CodingKeys.self)
-        self.cache = try container.decode([Key : Node<Key, Value>].self, forKey: CacheService<Key, Value>.CodingKeys.cache)
-        self.capacity = try container.decode(Int.self, forKey: CacheService<Key, Value>.CodingKeys.capacity)
-        self.head = try container.decodeIfPresent(Node<Key, Value>.self, forKey: CacheService<Key, Value>.CodingKeys.head)
-        self.tail = try container.decodeIfPresent(Node<Key, Value>.self, forKey: CacheService<Key, Value>.CodingKeys.tail)
+    public required init(from decoder: any Decoder) throws {
+        let container: KeyedDecodingContainer<CimmCacheService<Key, Value>.CodingKeys> = try decoder.container(keyedBy: CimmCacheService<Key, Value>.CodingKeys.self)
+        self.cache = try container.decode([Key : Node<Key, Value>].self, forKey: CimmCacheService<Key, Value>.CodingKeys.cache)
+        self.capacity = try container.decode(Int.self, forKey: CimmCacheService<Key, Value>.CodingKeys.capacity)
+        self.head = try container.decodeIfPresent(Node<Key, Value>.self, forKey: CimmCacheService<Key, Value>.CodingKeys.head)
+        self.tail = try container.decodeIfPresent(Node<Key, Value>.self, forKey: CimmCacheService<Key, Value>.CodingKeys.tail)
     }
     
-    init(capacity: Int = 500, documentsDirectory: URL? = nil) {
+    public init(capacity: Int = 500, documentsDirectory: URL? = nil) {
         self.capacity = capacity
         self.customDocumentsDirectory = documentsDirectory
     }
     
-    func get(key: Key) -> Value? {
+    public func get(key: Key) -> Value? {
         guard let node = cache[key] else {
             return nil
         }
@@ -55,7 +55,7 @@ class CacheService<Key: Hashable & Codable, Value: Codable>: Codable, CacheServi
         return node.value
     }
     
-    func set(_ value: Value, _ key: Key) {
+    public func set(_ value: Value, _ key: Key) {
         cacheQueue.async(flags: .barrier) {
             if let node = self.cache[key] {
                 node.value = value
@@ -73,7 +73,7 @@ class CacheService<Key: Hashable & Codable, Value: Codable>: Codable, CacheServi
     }
 }
 
-extension CacheService {
+extension CimmCacheService {
     private func addToHead(_ node: Node<Key, Value>) {
         node.next = head
         node.prev = nil
@@ -110,7 +110,7 @@ extension CacheService {
     }
 }
 
-extension CacheService {
+extension CimmCacheService {
     
     // MARK: - Data Persistence
     
@@ -118,7 +118,7 @@ extension CacheService {
     /// Load data from the disk
     /// - Parameter path: The path, a `URL` from which to load the `Data`.
     /// - Returns: the `Data` if it exists at the given path.
-    func loadDataFromDisk(path: URL) throws -> Data? {
+    public func loadDataFromDisk(path: URL) throws -> Data? {
         return try Data(contentsOf: path)
     }
     
@@ -127,7 +127,7 @@ extension CacheService {
     /// - Parameters:
     ///   - data: The `Data` to save to disk.
     ///   - filename: A filename to use when saving the data.
-    func saveDataToDisk(data: Data, filename: String) throws {
+    public func saveDataToDisk(data: Data, filename: String) throws {
         
         let directory: URL? = getDocumentsDirectory()
         
@@ -141,7 +141,7 @@ extension CacheService {
     // TODO: Move this into a separate persistance service
     /// Retrieve the documents directory or use a user-provided custom documents directory if one is provided.
     /// - Returns: The Documents directory to use when persisting and retrieving data.
-    func getDocumentsDirectory() -> URL? {
+    public func getDocumentsDirectory() -> URL? {
         if let directory = self.customDocumentsDirectory {
             return directory
         }

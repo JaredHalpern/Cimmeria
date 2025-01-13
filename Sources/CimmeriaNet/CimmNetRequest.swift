@@ -5,20 +5,15 @@
 
 import Foundation
 
-enum Path: String {
-    case device = "device"
-    case devices = "devices"
-    case sessions = "sessions"
-    case none = ""
+public enum Path: String {
+    case sample = "sample"
 }
 
-enum PathJSON: String {
-    case sessions = "sessions"
-    case devices = "devices"
-    case chart = "chart"
+public enum PathJSON: String {
+    case sample = "sample"
 }
 
-enum HTTPType: String {
+public enum HTTPType: String {
     case GET
     case POST
     case PUT
@@ -27,7 +22,7 @@ enum HTTPType: String {
 
 // MARK: -
 
-protocol CimmNetRequestable: CustomStringConvertible {
+public protocol CimmNetRequestable: CustomStringConvertible {
     associatedtype ResponseType
     
     var path: Path { get }

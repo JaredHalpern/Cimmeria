@@ -1,5 +1,5 @@
 //
-//  ImageCacheService.swift
+//  ImageCimmCacheService.swift
 //  RecipeApp
 //
 //
@@ -8,39 +8,39 @@ import Foundation
 import SwiftUI
 import UIKit
 
-protocol ImageCacheServiceAPI {
+public protocol ImageCimmCacheServiceAPI {
     func get(key: URL) -> Data?
     func set(_ value: Data, _ key: URL)
 }
 
 /// Cache uses remote-url and local filename.
 /// We then retrieve the file data using the local filename.
-final class ImageCacheService: CacheService<URL, String> {
+public final class ImageCimmCacheService: CimmCacheService<URL, String> {
 
-    private static var sharedImageCache: ImageCacheService?
+    private static var sharedImageCache: ImageCimmCacheService?
         
     private init(capacity: Int) {
         super.init(capacity: capacity)
     }
     
-    class func shared(capacity: Int = 500) -> ImageCacheService {
+    public class func shared(capacity: Int = 500) -> ImageCimmCacheService {
         if let shared = sharedImageCache {
             return shared
         } else {
-            let cache = ImageCacheService(capacity: capacity)
+            let cache = ImageCimmCacheService(capacity: capacity)
             sharedImageCache = cache
             return cache
         }
     }
     
-    required init(from decoder: any Decoder) throws {
+    public required init(from decoder: any Decoder) throws {
         fatalError("ImageCacheService init(from:) has not been implemented")
     }
     
     /// Gets image from local disk
     /// - Parameter key: The remote url. This is used to obtain the filename from the cache which is how the file is stored locally on disk.
     /// - Returns: The image data from disk, if it exists.
-    func getImageDataFromLocalCache(remoteURL: URL) throws -> Data? {
+    public func getImageDataFromLocalCache(remoteURL: URL) throws -> Data? {
         guard let filename = get(key: remoteURL), let directoryURL = getDocumentsDirectory() else {
             return nil
         }
@@ -50,7 +50,7 @@ final class ImageCacheService: CacheService<URL, String> {
         return imageData
     }
     
-    func set(imageData: Data, remoteURL: URL, filename: String) {
+    public func set(imageData: Data, remoteURL: URL, filename: String) {
         do {
             try saveDataToDisk(data: imageData, filename:filename)
             set(filename, remoteURL)

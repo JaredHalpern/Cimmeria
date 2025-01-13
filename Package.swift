@@ -9,7 +9,7 @@ let package = Package(
     products: [
         // Products define the executables and libraries a package produces, 
         // making them visible to other packages.
-//        .library(name: "CimmeriaCache", targets: ["CimmeriaCache"]),
+        .library(name: "CimmeriaCache", targets: ["CimmeriaCache"]),
         .library(name: "CimmeriaNet", targets: ["CimmeriaNet"]),
 //        .library(name: "CimmeriaSec", targets: ["CimmeriaSec"]),
     ],
@@ -21,12 +21,12 @@ let package = Package(
         .testTarget(
             name: "CimmeriaTests",
             dependencies: ["Cimmeria"]),
-//        .target(
-//            name: "CimmeriaCache",
-//            dependencies: []),
-//        .testTarget(
-//            name: "CimmeriaCacheTests",
-//            dependencies: ["CimmeriaCache"]),
+        .target(
+            name: "CimmeriaCache",
+            dependencies: []),
+        .testTarget(
+            name: "CimmeriaCacheTests",
+            dependencies: ["CimmeriaCache"]),
         .target(
             name: "CimmeriaNet",
             dependencies: []),

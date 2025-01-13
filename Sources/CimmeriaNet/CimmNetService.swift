@@ -208,7 +208,7 @@ extension CimmNetService {
     // MARK: - Generic
   
     @available(iOS 16.0.0, *)
-    private func fetchForRequest<ModelType: Decodable>(_ networkRequest: any CimmNetRequestable, modelType: ModelType.Type) async throws -> ModelType {
+    public func fetchForRequest<ModelType: Decodable>(_ networkRequest: any CimmNetRequestable, modelType: ModelType.Type) async throws -> ModelType {
         
         let request = makeRequest(networkRequest)
         
