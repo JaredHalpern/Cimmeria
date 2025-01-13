@@ -8,9 +8,9 @@ import Foundation
 
 class CimmNetworkServiceFake: CimmNetServiceAPI {
     
-    private var environment: AppEnvironment
+    private var environment: CimmAppEnvironment
     
-    init(environment: AppEnvironment) {
+    init(environment: CimmAppEnvironment) {
         self.environment = environment
     }
     

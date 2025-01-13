@@ -13,14 +13,14 @@ class CimmNetService: CimmNetServiceAPI {
     private static var sharedNetworkService: CimmNetService?
     
     private var dataTasks: [URL: URLSessionTask] = [:]
-    private var environment: AppEnvironment
+    private var environment: CimmAppEnvironment
     private let taskQueue = DispatchQueue(label: "com.networkServiceQueue.taskQueue", attributes: .concurrent)
     
-    private init(environment: AppEnvironment) {
+    private init(environment: CimmAppEnvironment) {
         self.environment = environment
     }
     
-    class func shared(environment: AppEnvironment = FakeEnvironment()) -> CimmNetService {
+    class func shared(environment: CimmAppEnvironment = FakeEnvironment()) -> CimmNetService {
         if let shared = sharedNetworkService {
             print("Network Service with environment: \(environment.apiBaseURL)")
             return shared

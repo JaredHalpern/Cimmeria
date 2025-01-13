@@ -8,9 +8,9 @@ let package = Package(
     products: [
         // Products define the executables and libraries a package produces, 
         // making them visible to other packages.
-        .library(name: "CimmeriaCache", targets: ["CimmeriaCache"]),
+//        .library(name: "CimmeriaCache", targets: ["CimmeriaCache"]),
         .library(name: "CimmeriaNet", targets: ["CimmeriaNet"]),
-        .library(name: "CimmeriaSec", targets: ["CimmeriaSec"]),
+//        .library(name: "CimmeriaSec", targets: ["CimmeriaSec"]),
     ],
     targets: [
         // Targets are the basic building blocks of a package, defining a module or a test suite.
@@ -20,20 +20,23 @@ let package = Package(
         .testTarget(
             name: "CimmeriaTests",
             dependencies: ["Cimmeria"]),
+//        .target(
+//            name: "CimmeriaCache",
+//            dependencies: []),
+//        .testTarget(
+//            name: "CimmeriaCacheTests",
+//            dependencies: ["CimmeriaCache"]),
         .target(
-            name: "CimmeriaCache"),
-        .testTarget(
-            name: "CimmeriaCacheTests",
-            dependencies: ["Cimmeria"]),
-        .target(
-            name: "CimmeriaNet"),
+            name: "CimmeriaNet",
+            dependencies: []),
         .testTarget(
             name: "CimmeriaNetTests",
-            dependencies: ["Cimmeria"]),
-        .target(
-            name: "CimmeriaSec"),
-        .testTarget(
-            name: "CimmeriaSecTests",
-            dependencies: ["Cimmeria"]),
+            dependencies: ["CimmeriaNet"]),
+//        .target(
+//            name: "CimmeriaSec",
+//            dependencies: []),
+//        .testTarget(
+//            name: "CimmeriaSecTests",
+//            dependencies: ["CimmeriaSec"]),
     ]
 )
