@@ -6,7 +6,7 @@
 
 import Foundation
 
-class CimmNetService: CimmNetServiceAPI {
+public class CimmNetService: CimmNetServiceAPI {
     
     typealias DataResponse = (Data, URLResponse)
     
