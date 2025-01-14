@@ -7,7 +7,7 @@
 import Foundation
 
 class CimmNetworkServiceFake: CimmNetServiceAPI {
-    
+        
     private var environment: CimmAppEnvironment
     
     init(environment: CimmAppEnvironment) {
@@ -20,6 +20,10 @@ class CimmNetworkServiceFake: CimmNetServiceAPI {
     }
     
     func cancelTask(for url: URL) {
+    }
+    
+    func fetchForRequest<ModelType>(_ networkRequest: any CimmNetRequestable, modelType: ModelType.Type) async throws -> ModelType where ModelType : Decodable {
+        return try JSONDecoder().decode(modelType, from: Data())
     }
 }
 

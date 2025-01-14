@@ -6,7 +6,7 @@
 
 import Foundation
 
-public class CimmNetService: CimmNetServiceAPI {
+open class CimmNetService: CimmNetServiceAPI {
     
     typealias DataResponse = (Data, URLResponse)
     
@@ -16,11 +16,11 @@ public class CimmNetService: CimmNetServiceAPI {
     private var environment: CimmAppEnvironment
     private let taskQueue = DispatchQueue(label: "com.networkServiceQueue.taskQueue", attributes: .concurrent)
     
-    private init(environment: CimmAppEnvironment) {
+    public init(environment: CimmAppEnvironment) {
         self.environment = environment
     }
     
-    class func shared(environment: CimmAppEnvironment = FakeEnvironment()) -> CimmNetService {
+    public class func shared(environment: CimmAppEnvironment) -> CimmNetService {
         if let shared = sharedNetworkService {
             print("Network Service with environment: \(environment.apiBaseURL)")
             return shared
@@ -34,6 +34,22 @@ public class CimmNetService: CimmNetServiceAPI {
 }
 
 extension CimmNetService {
+    
+    @available(iOS 16.0.0, *)
+    public func fetchForRequest<ModelType: Decodable>(_ networkRequest: any CimmNetRequestable, modelType: ModelType.Type) async throws -> ModelType {
+        
+        let request = try makeRequest(networkRequest)
+        
+        guard let url = request.url else {
+            throw CimmNetServiceAPIError.unableToFormRequest
+        }
+        
+        // Cancel task if already exists
+        cancelTask(for: url)
+        
+        let data = try await initiateRequest(request: request)
+        return try decodeJSON(modelType, data: data)
+    }
     
     /// Cancel a specified network task in the queue.
     /// - Parameter url: The URL of the network task to cancel.
@@ -62,7 +78,7 @@ extension CimmNetService {
     /// - Parameter url: The `URL` from which to download the `Data`.
     /// - Returns: Downloaded `Data`.
     @available(iOS 13.0.0, *)
-    func initiateRequest(request: URLRequest) async throws -> Data {
+    private func initiateRequest(request: URLRequest) async throws -> Data {
         
         guard let url = request.url else {
             throw CimmNetServiceAPIError.unableToFormRequest
@@ -128,22 +144,29 @@ extension CimmNetService {
     
     // Factory pattern?
     @available(iOS 16.0, *)
-    private func GETrequest(path: Path, parameter: String?, json: PathJSON?) -> URLRequest {
+    private func GETrequest(path: String, parameter: String?, json: String?, queryItems: [String: String]?) throws -> URLRequest {
         
-        var url = self.environment.apiBaseURL.appending(path: path.rawValue)
+        // TODO: - Use URLComponents approach here instead:
         
-        // handle paths like /sessions/<session_id>/chart.json where <session_id> is the parameter
-        if let parameter = parameter {
-            url = url.appending(path: parameter)
+        guard let apiBaseURL = self.environment.apiBaseURL else {
+            throw CimmNetServiceAPIError.unableToFormRequest
         }
         
-        // handle paths like /sessions/<session_id>/chart.json where chart.json is the json or "PathJSON"
-        if let json = json {
-            url = url.appending(path: json.rawValue)
+        var components = URLComponents(string: apiBaseURL.absoluteString)
+        components?.path = path
+        
+        var queryItemsToAppend = [URLQueryItem]()
+        
+        queryItems?.forEach({ key, value in
+            queryItemsToAppend.append(URLQueryItem(name: key, value: value))
+        })
+        
+        components?.queryItems = queryItemsToAppend
+        
+        guard let url = components?.url else {
+            throw CimmNetServiceAPIError.unableToFormRequest
         }
         
-        url = url.appendingPathExtension("json")
-    
         var request = URLRequest(url: url)
         request.httpMethod = HTTPType.GET.rawValue
         request.setValue(self.environment.token, forHTTPHeaderField: "Authorization")
@@ -154,8 +177,12 @@ extension CimmNetService {
     }
     
     @available(iOS 16.0, *)
-    private func POSTrequest(_ path: Path) -> URLRequest {
-        var request = URLRequest(url: self.environment.apiBaseURL.appending(path: path.rawValue))
+    private func POSTrequest(_ path: String) throws -> URLRequest {
+        guard let apiBaseURL = self.environment.apiBaseURL else {
+            throw CimmNetServiceAPIError.unableToFormRequest
+        }
+        
+        var request = URLRequest(url: apiBaseURL.appending(path: path))
         request.httpMethod = HTTPType.POST.rawValue
         request.setValue(self.environment.token, forHTTPHeaderField: "Authorization")
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
@@ -166,8 +193,12 @@ extension CimmNetService {
     /// - Parameter path:
     /// - Returns:
     @available(iOS 16.0, *)
-    private func PUTrequest(_ path: Path) -> URLRequest {
-        var request = URLRequest(url: self.environment.apiBaseURL.appending(path: path.rawValue))
+    private func PUTrequest(_ path: String) throws -> URLRequest {
+        guard let apiBaseURL = self.environment.apiBaseURL else {
+            throw CimmNetServiceAPIError.unableToFormRequest
+        }
+        
+        var request = URLRequest(url: apiBaseURL.appending(path: path))
         request.httpMethod = HTTPType.PUT.rawValue
         request.setValue(self.environment.token, forHTTPHeaderField: "Authorization")
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
@@ -178,8 +209,12 @@ extension CimmNetService {
     /// - Parameter path:
     /// - Returns:
     @available(iOS 16.0, *)
-    private func DELETErequest(_ path: Path) -> URLRequest {
-        var request = URLRequest(url: self.environment.apiBaseURL.appending(path: path.rawValue))
+    private func DELETErequest(_ path: String) throws -> URLRequest {
+        guard let apiBaseURL = self.environment.apiBaseURL else {
+            throw CimmNetServiceAPIError.unableToFormRequest
+        }
+        
+        var request = URLRequest(url: apiBaseURL.appending(path: path))
         request.httpMethod = HTTPType.DELETE.rawValue
         request.setValue(self.environment.token, forHTTPHeaderField: "Authorization")
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
@@ -187,42 +222,25 @@ extension CimmNetService {
     }
     
     @available(iOS 16.0, *)
-    private func makeRequest(_ networkRequest: any CimmNetRequestable) -> URLRequest {
+    private func makeRequest(_ networkRequest: any CimmNetRequestable) throws -> URLRequest {
         switch networkRequest.HTTPType {
         case .GET:
-            return GETrequest(path: networkRequest.path,
-                              parameter: networkRequest.parameter,
-                              json: networkRequest.pathJSON)
+            return try GETrequest(path: networkRequest.path,
+                                  parameter: networkRequest.parameter,
+                                  json: networkRequest.pathJSON,
+                                  queryItems: networkRequest.queryItems)
         case .POST:
-            return POSTrequest(networkRequest.path)
+            return try POSTrequest(networkRequest.path)
         case .PUT:
-            return PUTrequest(networkRequest.path)
+            return try PUTrequest(networkRequest.path)
         case .DELETE:
-            return DELETErequest(networkRequest.path)
+            return try DELETErequest(networkRequest.path)
         }
     }
 }
 
 extension CimmNetService {
-    
-    // MARK: - Generic
   
-    @available(iOS 16.0.0, *)
-    public func fetchForRequest<ModelType: Decodable>(_ networkRequest: any CimmNetRequestable, modelType: ModelType.Type) async throws -> ModelType {
-        
-        let request = makeRequest(networkRequest)
-        
-        guard let url = request.url else {
-            throw CimmNetServiceAPIError.unableToFormRequest
-        }
-        
-        // Cancel task if already exists
-        cancelTask(for: url)
-        
-        let data = try await initiateRequest(request: request)
-        return try decodeJSON(modelType, data: data)
-    }
-    
     /// Exists in a separate function for when we build out the rest of the HTTP methods: POST, etc. Can also add analytics around failed fields here.
     private func decodeJSON<ModelType: Decodable>(_ modelType: ModelType.Type, data: Data) throws -> ModelType {
         do {

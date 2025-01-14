@@ -9,13 +9,21 @@ import SwiftUI
 import UIKit
 
 public protocol ImageCimmCacheServiceAPI {
-    func get(key: URL) -> Data?
-    func set(_ value: Data, _ key: URL)
+    func get(key: URL) -> String?
+    func set(_ value: String, _ key: URL)
 }
 
 /// Cache uses remote-url and local filename.
 /// We then retrieve the file data using the local filename.
-public final class ImageCimmCacheService: CimmCacheService<URL, String> {
+public final class ImageCimmCacheService: CimmCacheService<URL, String>, ImageCimmCacheServiceAPI {
+    
+    public override func get(key: URL) -> String? {
+        return super.get(key: key)
+    }
+    
+    public override func set(_ value: String, _ key: URL) {
+        super.set(value, key)
+    }
 
     private static var sharedImageCache: ImageCimmCacheService?
         

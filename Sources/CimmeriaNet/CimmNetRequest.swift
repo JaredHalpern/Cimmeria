@@ -5,11 +5,19 @@
 
 import Foundation
 
-public enum Path: String {
+public protocol Path {
+    var path: String? { get }
+}
+
+public protocol PathJSON {
+    var pathJSON: String? { get }
+}
+
+public enum PathSample: String {
     case sample = "sample"
 }
 
-public enum PathJSON: String {
+public enum PathJSONSample: String {
     case sample = "sample"
 }
 
@@ -25,11 +33,12 @@ public enum HTTPType: String {
 public protocol CimmNetRequestable: CustomStringConvertible {
     associatedtype ResponseType
     
-    var path: Path { get }
+    var path: String { get }
     var HTTPType: HTTPType { get }
     var responseType: ResponseType.Type { get }
     var parameter: String? { get }
-    var pathJSON: PathJSON? { get }
+    var pathJSON: String? { get }
+    var queryItems: [String: String]? { get }
 }
 
 extension CimmNetRequestable {
@@ -38,7 +47,7 @@ extension CimmNetRequestable {
     }
 }
 
-protocol CimmNetResponseProtocol {
+public protocol CimmNetResponseProtocol {
     associatedtype ModelType
     
     var modelType: ModelType.Type {get}

@@ -6,25 +6,30 @@
 
 import Foundation
 
-protocol CimmAppEnvironment {
+public protocol CimmAppEnvironment {
     var host: String { get }
-    var path: String { get }
-    var token: String { get }
-    var apiBaseURL: URL { get }
+    var path: String? { get }
+    var token: String? { get }
+    var apiBaseURL: URL? { get }
 }
 
 extension CimmAppEnvironment {
-    var apiBaseURL: URL {
-        URL(string: host + path)!
+    public var apiBaseURL: URL? {
+        var components = URLComponents(string: host)
+        
+        if let path = path {
+            components?.path = path
+        }
+        return components?.url
     }
 }
 
 // MARK: - Environments
 
 public class FakeEnvironment: CimmAppEnvironment {
-    let host = "FAKEURL/api"
-    let path = "/v1"
-    let token = "Token IAmAFakeToken"
+    public let host = "FAKEURL/api"
+    public let path: String? = "/v1"
+    public var token: String? = "Token IAmAFakeToken"
 }
 
 // Add additional environments as needed for Staging, QA, Development by conforming to AppEnvironment protocol.
