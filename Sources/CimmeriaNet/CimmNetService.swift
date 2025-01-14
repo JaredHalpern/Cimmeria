@@ -35,6 +35,8 @@ open class CimmNetService: CimmNetServiceAPI {
 
 extension CimmNetService {
     
+    // TODO: Consolidate
+    
     @available(iOS 16.0.0, *)
     public func fetchForRequest<ModelType: Decodable>(_ networkRequest: any CimmNetRequestable, modelType: ModelType.Type) async throws -> ModelType {
         
@@ -48,6 +50,24 @@ extension CimmNetService {
         cancelTask(for: url)
         
         let data = try await initiateRequest(request: request)
+        
+        return try decodeJSON(modelType, data: data)
+    }
+    
+    @available(iOS 16.0.0, *)
+    public func fetchForRequest<ModelType: Decodable>(_ networkRequest: any CimmNetRequestable, modelType: [ModelType].Type) async throws -> [ModelType] {
+        
+        let request = try makeRequest(networkRequest)
+        
+        guard let url = request.url else {
+            throw CimmNetServiceAPIError.unableToFormRequest
+        }
+        
+        // Cancel task if already exists
+        cancelTask(for: url)
+        
+        let data = try await initiateRequest(request: request)
+        
         return try decodeJSON(modelType, data: data)
     }
     
@@ -243,6 +263,14 @@ extension CimmNetService {
   
     /// Exists in a separate function for when we build out the rest of the HTTP methods: POST, etc. Can also add analytics around failed fields here.
     private func decodeJSON<ModelType: Decodable>(_ modelType: ModelType.Type, data: Data) throws -> ModelType {
+        do {
+            return try JSONDecoder().decode(modelType, from: data)
+        } catch {
+            throw CimmNetServiceAPIError.failedToDecode(error)
+        }
+    }
+    
+    private func decodeJSON<ModelType: Decodable>(_ modelType: [ModelType].Type, data: Data) throws -> [ModelType] {
         do {
             return try JSONDecoder().decode(modelType, from: data)
         } catch {
