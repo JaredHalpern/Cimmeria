@@ -8,7 +8,7 @@ import Foundation
 
 open class CimmNetService: CimmNetServiceAPI {
     
-    typealias DataResponse = (Data, URLResponse)
+    typealias DataResponse = (data: Data, response: URLResponse)
     
     private static var sharedNetworkService: CimmNetService?
     
@@ -104,57 +104,23 @@ extension CimmNetService {
             throw CimmNetServiceAPIError.unableToFormRequest
         }
         
-        return try await withTaskCancellationHandler {
-            
-            // Run the main task
-            return try await withCheckedThrowingContinuation { continuation in
-                
-                let task = URLSession.shared.dataTask(with: request) { data, response, error in
-                    self.taskQueue.async (flags: .barrier) {
-                        self.dataTasks.removeValue(forKey: url)
-                    }
-                    
-                    if let error = error {
-                        
-                        continuation.resume(throwing: CimmNetServiceAPIError.unknown(error))
-                        
-                    } else if let data = data,
-                              let response = response as? HTTPURLResponse,
-                              (200..<300).contains(response.statusCode) {
-                        
-                        continuation.resume(returning: data)
-                        
-                    } else if let response = response as? HTTPURLResponse,
-                              (400..<500).contains(response.statusCode) {
-                        
-                        continuation.resume(throwing: CimmNetServiceAPIError.clientError("\(response.statusCode)"))
-                        
-                    } else if let response = response as? HTTPURLResponse,
-                              (500..<600).contains(response.statusCode) {
-                        
-                        continuation.resume(throwing: CimmNetServiceAPIError.serverError("\(response.statusCode)"))
-                    } else if let data = data {
-                        
-                        continuation.resume(returning: data)
-                    }
-                    // TODO: add other HTTP Status Codes if desired.
-                }
-                                
-                self.taskQueue.async (flags: .barrier) {
-                    self.dataTasks[url] = task
-                }
-                
-                task.resume()
-            }
-        } onCancel: {
-            // This block runs if the task is canceled
-            self.taskQueue.async (flags: .barrier) {
-                if let task = self.dataTasks[url] {
-                    task.cancel()
-                    self.dataTasks.removeValue(forKey: url)
-                }
+        var data: Data
+        
+        let dataResponse: DataResponse = try await URLSession.shared.data(for: request)
+        
+        if let response = dataResponse.response as? HTTPURLResponse {
+            switch response.statusCode {
+            case 200..<300:
+                return dataResponse.data
+            case 400..<500:
+                throw CimmNetServiceAPIError.clientError("\(response.statusCode)")
+            case 500..<600:
+                throw CimmNetServiceAPIError.serverError("\(response.statusCode)")
+            default:
+                throw CimmNetServiceAPIError.unknown("\(response.statusCode)")
             }
         }
+        throw CimmNetServiceAPIError.unknown("Unknown error")
     }
 }
 

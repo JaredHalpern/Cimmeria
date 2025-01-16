@@ -7,7 +7,8 @@
 import Foundation
 
 enum CimmNetServiceAPIError: Error {
-    case unknown(Error)
+    case unknownError(Error)
+    case unknown(String)
     case failedToDecode(Error)
     case clientError(String)
     case serverError(String)
@@ -17,6 +18,8 @@ enum CimmNetServiceAPIError: Error {
     
     var message: String {
         switch self {
+        case .unknownError(let error):
+            return "Unknown error: \(error)"
         case .unknown(let error):
             return "Unknown error: \(error)"
         case .failedToDecode(let error):
