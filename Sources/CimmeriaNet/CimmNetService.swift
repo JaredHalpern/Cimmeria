@@ -146,7 +146,9 @@ extension CimmNetService {
             queryItemsToAppend.append(URLQueryItem(name: key, value: value))
         })
         
-        components?.queryItems = queryItemsToAppend
+        if queryItemsToAppend.count > 0 {
+            components?.queryItems = queryItemsToAppend
+        }
         
         guard let url = components?.url else {
             throw CimmNetServiceAPIError.unableToFormRequest
