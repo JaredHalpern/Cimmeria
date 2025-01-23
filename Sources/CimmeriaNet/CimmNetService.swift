@@ -35,8 +35,6 @@ open class CimmNetService: CimmNetServiceAPI {
 
 extension CimmNetService {
     
-    // TODO: Consolidate
-    
     @available(iOS 16.0.0, *)
     public func fetchForRequest<ModelType: Decodable>(_ networkRequest: any CimmNetRequestable, modelType: ModelType.Type) async throws -> ModelType {
         
@@ -51,7 +49,8 @@ extension CimmNetService {
         
         let data = try await initiateRequest(request: request)
         
-        return try decodeJSON(modelType, data: data)
+        let result = try decodeJSON(modelType, data: data)
+        return result
     }
     
     @available(iOS 16.0.0, *)
@@ -67,8 +66,8 @@ extension CimmNetService {
         cancelTask(for: url)
         
         let data = try await initiateRequest(request: request)
-        
-        return try decodeJSON(modelType, data: data)
+        let result = try decodeJSON(modelType, data: data)
+        return result
     }
     
     /// Cancel a specified network task in the queue.
