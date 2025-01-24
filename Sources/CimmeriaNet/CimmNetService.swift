@@ -48,9 +48,7 @@ extension CimmNetService {
         cancelTask(for: url)
         
         let data = try await initiateRequest(request: request)
-        
-        let result = try decodeJSON(modelType, data: data)
-        return result
+        return try decodeJSON(modelType, data: data)
     }
     
     @available(iOS 16.0.0, *)
@@ -66,8 +64,7 @@ extension CimmNetService {
         cancelTask(for: url)
         
         let data = try await initiateRequest(request: request)
-        let result = try decodeJSON(modelType, data: data)
-        return result
+        return try decodeJSON(modelType, data: data)
     }
     
     /// Cancel a specified network task in the queue.
