@@ -22,12 +22,12 @@ open class CimmNetService: CimmNetServiceAPI {
     
     public class func shared(environment: CimmAppEnvironment) -> CimmNetService {
         if let shared = sharedNetworkService {
-            print("Network Service with environment: \(environment.apiBaseURL)")
+//            print("Network Service with environment: \(environment.apiBaseURL)")
             return shared
         } else {
             let service = CimmNetService(environment: environment)
             sharedNetworkService = service
-            print("Network Service with environment: \(environment.apiBaseURL)")
+            print("Network Service initialized with environment: \(environment.apiBaseURL)")
             return service
         }
     }
