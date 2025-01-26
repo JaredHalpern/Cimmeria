@@ -39,7 +39,7 @@ extension CimmNetService {
     public func fetchForRequest<ModelType: Decodable>(_ networkRequest: any CimmNetRequestable, modelType: ModelType.Type) async throws -> ModelType {
         
         let request = try makeRequest(networkRequest)
-        
+        print("--> request: \(request)")
         guard let url = request.url else {
             throw CimmNetServiceAPIError.unableToFormRequest
         }
@@ -161,7 +161,7 @@ extension CimmNetService {
     }
     
     @available(iOS 16.0, *)
-    private func POSTrequest(_ path: String) throws -> URLRequest {
+    private func POSTrequest(path: String, bodyItems: [String: String]?) throws -> URLRequest {
         guard let apiBaseURL = self.environment.apiBaseURL else {
             throw CimmNetServiceAPIError.unableToFormRequest
         }
@@ -170,6 +170,14 @@ extension CimmNetService {
         request.httpMethod = HTTPType.POST.rawValue
         request.setValue(self.environment.token, forHTTPHeaderField: "Authorization")
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        
+        var body: [String: String] = [:]
+        
+        bodyItems?.forEach({ (key, value) in
+            body[key] = value
+        })
+        request.httpBody = try JSONSerialization.data(withJSONObject: body)
+
         return request
     }
     
@@ -214,7 +222,8 @@ extension CimmNetService {
                                   json: networkRequest.pathJSON,
                                   queryItems: networkRequest.queryItems)
         case .POST:
-            return try POSTrequest(networkRequest.path)
+            return try POSTrequest(path: networkRequest.path,
+                                   bodyItems: networkRequest.bodyItems)
         case .PUT:
             return try PUTrequest(networkRequest.path)
         case .DELETE:
