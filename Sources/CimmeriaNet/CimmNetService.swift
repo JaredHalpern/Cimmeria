@@ -122,16 +122,17 @@ extension CimmNetService {
 // MARK: - Private
 
 extension CimmNetService {
-    
-    // Factory pattern?
+
     @available(iOS 16.0, *)
-    private func GETrequest(path: String, parameter: String?, json: String?, queryItems: [String: String]?) throws -> URLRequest {
-        
-        // TODO: - Use URLComponents approach here instead:
+    private func GETRequest(networkRequest: any CimmNetRequestable) throws -> URLRequest {
         
         guard let apiBaseURL = self.environment.apiBaseURL else {
             throw CimmNetServiceAPIError.unableToFormRequest
         }
+
+        let path = networkRequest.path
+        let parameter = networkRequest.parameter
+        let queryItems = networkRequest.queryItems
         
         var components = URLComponents(string: apiBaseURL.absoluteString)
         components?.path = path
@@ -149,21 +150,36 @@ extension CimmNetService {
         guard let url = components?.url else {
             throw CimmNetServiceAPIError.unableToFormRequest
         }
-        
+
         var request = URLRequest(url: url)
         request.httpMethod = HTTPType.GET.rawValue
-        request.setValue(self.environment.token, forHTTPHeaderField: "Authorization")
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
         
-        print("GETrequest: \(request)")
+        // assemble auth
+        // TODO: - Switch on auth type from request
+        
+        if
+            let username = networkRequest.username,
+            let password = networkRequest.password
+        {
+            if let data = "\(username):\(password)".data(using: .utf8) {
+                let authorizationHeader = "Basic \(data.base64EncodedString())"
+                request.setValue(authorizationHeader, forHTTPHeaderField: "Authorization")
+            }
+        }
+
         return request
     }
     
     @available(iOS 16.0, *)
-    private func POSTrequest(path: String, bodyItems: [String: String]?) throws -> URLRequest {
+    private func POSTrequest(networkRequest: any CimmNetRequestable) throws -> URLRequest {
+        
         guard let apiBaseURL = self.environment.apiBaseURL else {
             throw CimmNetServiceAPIError.unableToFormRequest
         }
+        
+        let path = networkRequest.path
+        let bodyItems = networkRequest.bodyItems
         
         var request = URLRequest(url: apiBaseURL.appending(path: path))
         request.httpMethod = HTTPType.POST.rawValue
@@ -177,6 +193,19 @@ extension CimmNetService {
         })
         request.httpBody = try JSONSerialization.data(withJSONObject: body)
 
+        // assemble auth
+        // TODO: - Switch on auth type from request
+        
+        if
+            let username = networkRequest.username,
+            let password = networkRequest.password
+        {
+            if let data = "\(username):\(password)".data(using: .utf8) {
+                let authorizationHeader = "Basic \(data.base64EncodedString())"
+                request.setValue(authorizationHeader, forHTTPHeaderField: "Authorization")
+            }
+        }
+        
         return request
     }
     
@@ -184,10 +213,12 @@ extension CimmNetService {
     /// - Parameter path:
     /// - Returns:
     @available(iOS 16.0, *)
-    private func PUTrequest(_ path: String) throws -> URLRequest {
+    private func PUTrequest(networkRequest: any CimmNetRequestable) throws -> URLRequest {
         guard let apiBaseURL = self.environment.apiBaseURL else {
             throw CimmNetServiceAPIError.unableToFormRequest
         }
+        
+        let path = networkRequest.path
         
         var request = URLRequest(url: apiBaseURL.appending(path: path))
         request.httpMethod = HTTPType.PUT.rawValue
@@ -200,10 +231,12 @@ extension CimmNetService {
     /// - Parameter path:
     /// - Returns:
     @available(iOS 16.0, *)
-    private func DELETErequest(_ path: String) throws -> URLRequest {
+    private func DELETErequest(networkRequest: any CimmNetRequestable) throws -> URLRequest {
         guard let apiBaseURL = self.environment.apiBaseURL else {
             throw CimmNetServiceAPIError.unableToFormRequest
         }
+        
+        let path = networkRequest.path
         
         var request = URLRequest(url: apiBaseURL.appending(path: path))
         request.httpMethod = HTTPType.DELETE.rawValue
@@ -212,21 +245,20 @@ extension CimmNetService {
         return request
     }
     
+    /// Assemble the request
+    /// - Parameter networkRequest: the network request containing request info
+    /// - Returns: A URLRequest which can be executed
     @available(iOS 16.0, *)
     private func makeRequest(_ networkRequest: any CimmNetRequestable) throws -> URLRequest {
         switch networkRequest.HTTPType {
         case .GET:
-            return try GETrequest(path: networkRequest.path,
-                                  parameter: networkRequest.parameter,
-                                  json: networkRequest.pathJSON,
-                                  queryItems: networkRequest.queryItems)
+            return try GETRequest(networkRequest: networkRequest)
         case .POST:
-            return try POSTrequest(path: networkRequest.path,
-                                   bodyItems: networkRequest.bodyItems)
+            return try POSTrequest(networkRequest: networkRequest)
         case .PUT:
-            return try PUTrequest(networkRequest.path)
+            return try PUTrequest(networkRequest: networkRequest)
         case .DELETE:
-            return try DELETErequest(networkRequest.path)
+            return try DELETErequest(networkRequest: networkRequest)
         }
     }
 }

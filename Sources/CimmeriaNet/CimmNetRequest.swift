@@ -28,6 +28,11 @@ public enum HTTPType: String {
     case DELETE
 }
 
+public enum AuthType: String {
+    case basic
+    case oauth // TODO
+}
+
 // MARK: -
 
 public protocol CimmNetRequestable: CustomStringConvertible {
@@ -40,6 +45,10 @@ public protocol CimmNetRequestable: CustomStringConvertible {
     var pathJSON: String? { get }
     var queryItems: [String: String]? { get }
     var bodyItems: [String: String]? { get }
+    
+    var authType: AuthType? { get }
+    var username: String? { get }
+    var password: String? { get }
 }
 
 extension CimmNetRequestable {
