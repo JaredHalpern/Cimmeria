@@ -40,7 +40,7 @@ extension CimmNetService {
         let request = try makeRequest(networkRequest)
         print("--> request: \(request)")
         guard let url = request.url else {
-            throw CimmNetServiceAPIError.unableToFormRequest
+            throw CimmNetServiceAPIError.unableToFormRequest("Missing url.")
         }
         
         // Cancel task if already exists
@@ -56,7 +56,7 @@ extension CimmNetService {
         let request = try makeRequest(networkRequest)
         
         guard let url = request.url else {
-            throw CimmNetServiceAPIError.unableToFormRequest
+            throw CimmNetServiceAPIError.unableToFormRequest("Missing url.")
         }
         
         // Cancel task if already exists
@@ -96,7 +96,7 @@ extension CimmNetService {
     private func initiateRequest(request: URLRequest) async throws -> Data {
         
         guard let url = request.url else {
-            throw CimmNetServiceAPIError.unableToFormRequest
+            throw CimmNetServiceAPIError.unableToFormRequest("Missing url.")
         }
         
         var data: Data
@@ -127,7 +127,7 @@ extension CimmNetService {
     private func GETRequest(networkRequest: any CimmNetRequestable) throws -> URLRequest {
         
         guard let apiBaseURL = self.environment.apiBaseURL else {
-            throw CimmNetServiceAPIError.unableToFormRequest
+            throw CimmNetServiceAPIError.unableToFormRequest("Missing api base url.")
         }
 
         let path = networkRequest.path
@@ -148,7 +148,7 @@ extension CimmNetService {
         }
         
         guard let url = components?.url else {
-            throw CimmNetServiceAPIError.unableToFormRequest
+            throw CimmNetServiceAPIError.unableToFormRequest("Missing components url.")
         }
 
         var request = URLRequest(url: url)
@@ -175,7 +175,7 @@ extension CimmNetService {
     private func POSTrequest(networkRequest: any CimmNetRequestable) throws -> URLRequest {
         
         guard let apiBaseURL = self.environment.apiBaseURL else {
-            throw CimmNetServiceAPIError.unableToFormRequest
+            throw CimmNetServiceAPIError.unableToFormRequest("Missing api base url.")
         }
         
         let path = networkRequest.path
@@ -215,7 +215,7 @@ extension CimmNetService {
     @available(iOS 16.0, *)
     private func PUTrequest(networkRequest: any CimmNetRequestable) throws -> URLRequest {
         guard let apiBaseURL = self.environment.apiBaseURL else {
-            throw CimmNetServiceAPIError.unableToFormRequest
+            throw CimmNetServiceAPIError.unableToFormRequest("Missing api base url.")
         }
         
         let path = networkRequest.path
@@ -233,7 +233,7 @@ extension CimmNetService {
     @available(iOS 16.0, *)
     private func DELETErequest(networkRequest: any CimmNetRequestable) throws -> URLRequest {
         guard let apiBaseURL = self.environment.apiBaseURL else {
-            throw CimmNetServiceAPIError.unableToFormRequest
+            throw CimmNetServiceAPIError.unableToFormRequest("Missing api base url.")
         }
         
         let path = networkRequest.path

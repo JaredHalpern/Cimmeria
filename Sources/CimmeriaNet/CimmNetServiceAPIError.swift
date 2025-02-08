@@ -12,7 +12,7 @@ enum CimmNetServiceAPIError: Error {
     case failedToDecode(Error)
     case clientError(String)
     case serverError(String)
-    case unableToFormRequest
+    case unableToFormRequest(String?)
     case missingSessionId
     case unableToFormat(String)
     
@@ -28,8 +28,8 @@ enum CimmNetServiceAPIError: Error {
             return "Client Error: \(errorString)"
         case .serverError(let errorString):
             return "Server Error: \(errorString)"
-        case .unableToFormRequest:
-            return "Unable to form request"
+        case .unableToFormRequest(let errorString):
+            return "Unable to form request: \(errorString)"
         case .missingSessionId:
             return "Missing Session ID"
         case .unableToFormat(let problematicValue):
