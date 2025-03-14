@@ -44,7 +44,7 @@ public protocol CimmNetRequestable: CustomStringConvertible {
     var parameter: String? { get }
     var pathJSON: String? { get }
     var queryItems: [String: String]? { get }
-    var bodyItems: [String: String]? { get }
+    var bodyItems: [String: Any]? { get }
     
     var authType: AuthType? { get }
     var username: String? { get }

@@ -186,7 +186,7 @@ extension CimmNetService {
         request.setValue(self.environment.token, forHTTPHeaderField: "Authorization")
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
         
-        var body: [String: String] = [:]
+        var body: [String: Any] = [:]
         
         bodyItems?.forEach({ (key, value) in
             body[key] = value
