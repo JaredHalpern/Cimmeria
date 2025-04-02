@@ -34,6 +34,7 @@ open class CimmNetService: CimmNetServiceAPI {
 
 extension CimmNetService {
     
+    @discardableResult
     @available(iOS 16.0.0, *)
     public func fetchForRequest<ModelType: Decodable>(_ networkRequest: any CimmNetRequestable, modelType: ModelType.Type) async throws -> ModelType {
         
@@ -50,11 +51,12 @@ extension CimmNetService {
         return try decodeJSON(modelType, data: data)
     }
     
+    @discardableResult
     @available(iOS 16.0.0, *)
     public func fetchForRequest<ModelType: Decodable>(_ networkRequest: any CimmNetRequestable, modelType: [ModelType].Type) async throws -> [ModelType] {
         
         let request = try makeRequest(networkRequest)
-        
+        print("--> request (v2): \(request)")
         guard let url = request.url else {
             throw CimmNetServiceAPIError.unableToFormRequest("Missing url.")
         }
