@@ -133,7 +133,7 @@ extension CimmNetService {
         }
 
         let path = networkRequest.path
-        let parameter = networkRequest.parameter
+        let parameter = networkRequest.parameter // is this being used?
         let queryItems = networkRequest.queryItems
         
         var components = URLComponents(string: apiBaseURL.absoluteString)
@@ -215,6 +215,56 @@ extension CimmNetService {
     /// - Parameter path:
     /// - Returns:
     @available(iOS 16.0, *)
+    private func DELETErequest(networkRequest: any CimmNetRequestable) throws -> URLRequest {
+        
+        guard let apiBaseURL = self.environment.apiBaseURL else {
+            throw CimmNetServiceAPIError.unableToFormRequest("Missing api base url.")
+        }
+        
+        let path = networkRequest.path
+        let parameter = networkRequest.parameter // is this being used?
+        let queryItems = networkRequest.queryItems
+        
+        var components = URLComponents(string: apiBaseURL.absoluteString)
+        components?.path = path
+
+        var queryItemsToAppend = [URLQueryItem]()
+        
+        queryItems?.forEach({ key, value in
+            queryItemsToAppend.append(URLQueryItem(name: key, value: value))
+        })
+        
+        if queryItemsToAppend.count > 0 {
+            components?.queryItems = queryItemsToAppend
+        }
+        
+        guard let url = components?.url else {
+            throw CimmNetServiceAPIError.unableToFormRequest("Missing components url.")
+        }
+        
+//        var request = URLRequest(url: apiBaseURL.appending(path: path))
+        var request = URLRequest(url: url)
+        request.httpMethod = HTTPType.DELETE.rawValue
+//        request.setValue(self.environment.token, forHTTPHeaderField: "Authorization")
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        
+        if
+            let username = networkRequest.username,
+            let password = networkRequest.password
+        {
+            if let data = "\(username):\(password)".data(using: .utf8) {
+                let authorizationHeader = "Basic \(data.base64EncodedString())"
+                request.setValue(authorizationHeader, forHTTPHeaderField: "Authorization")
+            }
+        }
+
+        return request
+    }
+    
+    /// UNTESTED
+    /// - Parameter path:
+    /// - Returns:
+    @available(iOS 16.0, *)
     private func PUTrequest(networkRequest: any CimmNetRequestable) throws -> URLRequest {
         guard let apiBaseURL = self.environment.apiBaseURL else {
             throw CimmNetServiceAPIError.unableToFormRequest("Missing api base url.")
@@ -226,24 +276,17 @@ extension CimmNetService {
         request.httpMethod = HTTPType.PUT.rawValue
         request.setValue(self.environment.token, forHTTPHeaderField: "Authorization")
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
-        return request
-    }
-    
-    /// UNTESTED
-    /// - Parameter path:
-    /// - Returns:
-    @available(iOS 16.0, *)
-    private func DELETErequest(networkRequest: any CimmNetRequestable) throws -> URLRequest {
-        guard let apiBaseURL = self.environment.apiBaseURL else {
-            throw CimmNetServiceAPIError.unableToFormRequest("Missing api base url.")
+        
+        if
+            let username = networkRequest.username,
+            let password = networkRequest.password
+        {
+            if let data = "\(username):\(password)".data(using: .utf8) {
+                let authorizationHeader = "Basic \(data.base64EncodedString())"
+                request.setValue(authorizationHeader, forHTTPHeaderField: "Authorization")
+            }
         }
-        
-        let path = networkRequest.path
-        
-        var request = URLRequest(url: apiBaseURL.appending(path: path))
-        request.httpMethod = HTTPType.DELETE.rawValue
-        request.setValue(self.environment.token, forHTTPHeaderField: "Authorization")
-        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+
         return request
     }
     
