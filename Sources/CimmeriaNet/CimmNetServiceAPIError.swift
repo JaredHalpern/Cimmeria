@@ -15,7 +15,8 @@ enum CimmNetServiceAPIError: Error {
     case unableToFormRequest(String?)
     case missingSessionId
     case unableToFormat(String)
-    
+    case noContent(String)
+    // TODO: Have all of these work with Error associated types, not strings
     var message: String {
         switch self {
         case .unknownError(let error):
@@ -34,6 +35,8 @@ enum CimmNetServiceAPIError: Error {
             return "Missing Session ID"
         case .unableToFormat(let problematicValue):
             return "Unable to format \(problematicValue)"
+        case .noContent(let errorString):
+            return "Empty response received unexpectedly"
         }
     }
 }

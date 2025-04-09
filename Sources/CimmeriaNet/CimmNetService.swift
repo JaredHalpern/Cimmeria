@@ -48,6 +48,13 @@ extension CimmNetService {
         cancelTask(for: url)
         
         let data = try await initiateRequest(request: request)
+        
+        if data.isEmpty {
+            // return something void
+            
+            throw CimmNetServiceAPIError.noContent("Empty response received")
+        }
+        
         return try decodeJSON(modelType, data: data)
     }
     
@@ -97,27 +104,27 @@ extension CimmNetService {
     @available(iOS 13.0.0, *)
     private func initiateRequest(request: URLRequest) async throws -> Data {
         
-        guard let url = request.url else {
+        guard request.url != nil else {
             throw CimmNetServiceAPIError.unableToFormRequest("Missing url.")
         }
         
-        var data: Data
-        
         let dataResponse: DataResponse = try await URLSession.shared.data(for: request)
         
-        if let response = dataResponse.response as? HTTPURLResponse {
-            switch response.statusCode {
-            case 200..<300:
-                return dataResponse.data
-            case 400..<500:
-                throw CimmNetServiceAPIError.clientError("\(response.statusCode)")
-            case 500..<600:
-                throw CimmNetServiceAPIError.serverError("\(response.statusCode)")
-            default:
-                throw CimmNetServiceAPIError.unknown("\(response.statusCode)")
-            }
+        guard let response = dataResponse.response as? HTTPURLResponse else {
+            throw CimmNetServiceAPIError.unknown("Invalid Response")
         }
-        throw CimmNetServiceAPIError.unknown("Unknown error")
+        
+        switch response.statusCode {
+        case 200..<300:
+            // 204's return empty data
+            return response.statusCode == 204 ? Data() : dataResponse.data
+        case 400..<500:
+            throw CimmNetServiceAPIError.clientError("\(response.statusCode)")
+        case 500..<600:
+            throw CimmNetServiceAPIError.serverError("\(response.statusCode)")
+        default:
+            throw CimmNetServiceAPIError.unknown("\(response.statusCode)")
+        }
     }
 }
 
