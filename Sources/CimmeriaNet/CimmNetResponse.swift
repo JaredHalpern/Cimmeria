@@ -13,5 +13,6 @@ protocol CimmNetResponseType: Decodable, Equatable {
 struct SessionNetworkResponse: CimmNetResponseType {
     var id: String
 }
-
 */
+
+public struct EmptyResponse: Decodable { }

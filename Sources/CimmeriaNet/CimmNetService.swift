@@ -47,11 +47,15 @@ extension CimmNetService {
         // Cancel task if already exists
         cancelTask(for: url)
         
-        let data = try await initiateRequest(request: request)
+        // Not using status code for now.
+        let (statusCode, data): (Int, Data) = try await initiateRequest(request: request)
         
         if data.isEmpty {
-            // return something void
-            
+            // Avoid a forced-cast, on principle.
+            if modelType.self == EmptyResponse.self,
+               let empty = EmptyResponse() as? ModelType {
+                return empty
+            }
             throw CimmNetServiceAPIError.noContent("Empty response received")
         }
         
@@ -71,7 +75,13 @@ extension CimmNetService {
         // Cancel task if already exists
         cancelTask(for: url)
         
-        let data = try await initiateRequest(request: request)
+        // Not using status code for now.
+        let (statusCode, data): (Int, Data) = try await initiateRequest(request: request)
+        
+        if data.isEmpty && modelType.self != EmptyResponse.self {
+            throw CimmNetServiceAPIError.noContent("Empty response received")
+        }
+
         return try decodeJSON(modelType, data: data)
     }
     
@@ -102,22 +112,23 @@ extension CimmNetService {
     /// - Parameter url: The `URL` from which to download the `Data`.
     /// - Returns: Downloaded `Data`.
     @available(iOS 13.0.0, *)
-    private func initiateRequest(request: URLRequest) async throws -> Data {
+    private func initiateRequest(request: URLRequest) async throws -> (Int, Data) {
         
         guard request.url != nil else {
             throw CimmNetServiceAPIError.unableToFormRequest("Missing url.")
         }
         
+        // DataResponse = (data: Data, response: URLResponse)
         let dataResponse: DataResponse = try await URLSession.shared.data(for: request)
         
         guard let response = dataResponse.response as? HTTPURLResponse else {
             throw CimmNetServiceAPIError.unknown("Invalid Response")
         }
-        
+
         switch response.statusCode {
         case 200..<300:
-            // 204's return empty data
-            return response.statusCode == 204 ? Data() : dataResponse.data
+            // Special case: a 204 returns empty data.
+            return response.statusCode == 204 ? (204, Data()) : (response.statusCode, dataResponse.data)
         case 400..<500:
             throw CimmNetServiceAPIError.clientError("\(response.statusCode)")
         case 500..<600:
