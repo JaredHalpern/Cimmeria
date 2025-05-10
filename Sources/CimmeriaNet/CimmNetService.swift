@@ -39,7 +39,8 @@ extension CimmNetService {
     public func fetchForRequest<ModelType: Decodable>(_ networkRequest: any CimmNetRequestable, modelType: ModelType.Type) async throws -> ModelType {
         
         let request = try makeRequest(networkRequest)
-        print("--> Request: \(request)")
+        
+        print("--> ☁️ Request: \(request)")
         guard let url = request.url else {
             throw CimmNetServiceAPIError.unableToFormRequest("Missing url.")
         }
@@ -67,7 +68,7 @@ extension CimmNetService {
     public func fetchForRequest<ModelType: Decodable>(_ networkRequest: any CimmNetRequestable, modelType: [ModelType].Type) async throws -> [ModelType] {
         
         let request = try makeRequest(networkRequest)
-        print("--> Request (using [ModelType]): \(request)")
+        print("--> ☁️ Request: CimmeriaNet \(request)")
         guard let url = request.url else {
             throw CimmNetServiceAPIError.unableToFormRequest("Missing url.")
         }
